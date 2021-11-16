@@ -3,6 +3,7 @@ const app = express();
 const PORT = 6969;
 const stateData = require("./MOCK_DATA.json");
 const graphql = require('graphql');
+const cors = require( `cors` );
 const { GraphQLObjectType, GraphQLSchema, GraphQLInt, GraphQLString, GraphQLList } = graphql;
 const { graphqlHTTP } = require("express-graphql");
 
@@ -10,7 +11,7 @@ const StateType = new GraphQLObjectType({
     name: "State",
     fields: () => ({
         id: {type: GraphQLInt},
-        stateName: {type: GraphQLString}
+        name: {type: GraphQLString}
     })
 })
 
@@ -20,14 +21,14 @@ const RootQuery = new GraphQLObjectType({
         getAllStates: {
             type: new GraphQLList(StateType),
             args: { key: { type: GraphQLString } },
-            resolve(parent, args) {
+            resolve( parent, args) {
                 let result = [];
-                for (let i = 0; i < stateData.length; i ++) {
-                    const stateNameLower = stateData[i].stateName.toLowerCase();
-                    if (stateNameLower.startsWith(args.key.toLowerCase())) {
+                for ( let i = 0; i < stateData.length; i ++ ) {
+                    const stateNameLowerCase = stateData[i].name.toLowerCase();
+                    if ( stateNameLowerCase.startsWith(args.key.toLowerCase()) ) {
                         result.push(stateData[i]);
                     }
-                    if (result.length >= 10) {
+                    if ( result.length >= 8 ) {
                         break;
                     }
                 }
@@ -38,6 +39,8 @@ const RootQuery = new GraphQLObjectType({
 });
 
 const schema = new GraphQLSchema({query: RootQuery, mutation: null})
+
+app.use( cors() );
 
 app.use('/graphql', graphqlHTTP({
     schema,
